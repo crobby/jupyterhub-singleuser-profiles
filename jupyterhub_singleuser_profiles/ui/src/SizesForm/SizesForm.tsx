@@ -2,17 +2,13 @@ import * as React from 'react';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { APIGet, APIPost } from '../utils/APICalls';
 import { CM_PATH, SINGLE_SIZE_PATH, SIZES_PATH } from '../utils/const';
-import { UserConfigMapType, SizeDescription, UiConfigType } from '../utils/types';
+import { UserConfigMapType, SizeDescription } from '../utils/types';
 
 import './SizesForm.scss';
 
 const MAX_GPUS = 10;
 
-type ImageFormProps = {
-  uiConfig: UiConfigType;
-};
-
-const SizesForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
+const SizesForm: React.FC = () => {
   const [sizeDropdownOpen, setSizeDropdownOpen] = React.useState<boolean>(false);
   const [gpuDropdownOpen, setGpuDropdownOpen] = React.useState<boolean>(false);
   const [sizeList, setSizeList] = React.useState<string[]>();
@@ -114,59 +110,43 @@ const SizesForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
 
   const gpuOptions = React.useMemo(() => {
     const values: number[] = [];
-    const start = uiConfig.gpuConfig?.gpuDropdown?.start ?? 0;
-    const end = Math.max(uiConfig.gpuConfig?.gpuDropdown?.end ?? MAX_GPUS, start);
-
-    for (let i = start; i <= end; i++) {
+    for (let i = 0; i <= MAX_GPUS; i++) {
       values.push(i);
     }
     return values?.map((gpuSize) => <SelectOption key={gpuSize} value={`${gpuSize}`} />);
-  }, [uiConfig]);
-
-  const showSizes = sizeOptions && uiConfig.sizeConfig?.enabled !== false;
-  const showGpus = uiConfig.gpuConfig?.enabled !== false;
-
-  if (!showSizes && !showGpus) {
-    return null;
-  }
+  }, []);
 
   return (
     <div className="jsp-spawner__option-section">
       <div className="jsp-spawner__option-section__title">Deployment size</div>
-      {sizeOptions && uiConfig.sizeConfig?.enabled !== false && (
-        <>
-          <div className="jsp-spawner__size_options__title" id="container-size">
-            Container size
-          </div>
-          <Select
-            className="jsp-spawner__size_options__select"
-            variant={SelectVariant.single}
-            isOpen={sizeDropdownOpen}
-            onToggle={() => setSizeDropdownOpen(!sizeDropdownOpen)}
-            aria-labelledby="container-size"
-            selections={selectedSize}
-            onSelect={(e, selection) => postSizeChange((selection || 'Default') as string)}
-          >
-            {sizeOptions}
-          </Select>
-        </>
-      )}
-      {uiConfig.gpuConfig?.enabled !== false && (
-        <>
-          <div className="jsp-spawner__size_options__title">Number of GPUs</div>
-          <Select
-            className="jsp-spawner__size_options__select"
-            variant={SelectVariant.single}
-            isOpen={gpuDropdownOpen}
-            onToggle={() => setGpuDropdownOpen(!gpuDropdownOpen)}
-            aria-labelledby="container-size"
-            selections={selectedGpu}
-            onSelect={(e, selection) => postGPUChange(parseInt((selection || '0') as string))}
-          >
-            {gpuOptions}
-          </Select>
-        </>
-      )}
+      <div className="jsp-spawner__size_options__title" id="container-size">
+        Container size
+      </div>
+      <Select
+        className="jsp-spawner__size_options__select"
+        variant={SelectVariant.single}
+        isOpen={sizeDropdownOpen}
+        onToggle={() => setSizeDropdownOpen(!sizeDropdownOpen)}
+        aria-labelledby="container-size"
+        selections={selectedSize}
+        onSelect={(e, selection) => postSizeChange((selection || 'Default') as string)}
+      >
+        {sizeOptions}
+      </Select>
+      <div className="jsp-spawner__size_options__title">
+        Number of GPUs
+      </div>
+      <Select
+        className="jsp-spawner__size_options__select"
+        variant={SelectVariant.single}
+        isOpen={gpuDropdownOpen}
+        onToggle={() => setGpuDropdownOpen(!gpuDropdownOpen)}
+        aria-labelledby="container-size"
+        selections={selectedGpu}
+        onSelect={(e, selection) => postGPUChange(parseInt((selection || '0') as string))}
+      >
+        {gpuOptions}
+      </Select>
     </div>
   );
 };

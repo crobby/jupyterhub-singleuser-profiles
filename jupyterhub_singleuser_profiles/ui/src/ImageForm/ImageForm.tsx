@@ -1,19 +1,15 @@
 import * as React from 'react';
-import { Popover, Radio } from '@patternfly/react-core';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
+import { Button, ButtonVariant, Popover, Radio } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 import { APIGet, APIPost } from '../utils/APICalls';
 import { CM_PATH, DEFAULT_IMAGE_PATH, IMAGE_PATH } from '../utils/const';
-import { ImageType, ImageSoftwareType, UserConfigMapType, UiConfigType } from '../utils/types';
+import { UserConfigMapType } from '../utils/types';
 
 import './ImageForm.scss';
 
-type ImageFormProps = {
-  uiConfig: UiConfigType;
-};
-
-const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
+const ImageForm: React.FC = () => {
   const [selectedValue, setSelectedValue] = React.useState<string>();
-  const [imageList, setImageList] = React.useState<ImageType[]>();
+  const [imageList, setImageList] = React.useState<string[]>();
 
   const postChange = (text) => {
     const json = JSON.stringify({ last_selected_image: text });
@@ -27,7 +23,7 @@ const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
         setSelectedValue(data['last_selected_image'] || '');
       }
     });
-    APIGet(IMAGE_PATH).then((data: ImageType[]) => {
+    APIGet(IMAGE_PATH).then((data: string[]) => {
       if (!cancelled) {
         setImageList(data);
       }
@@ -44,7 +40,7 @@ const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
       return;
     }
 
-    if (selectedValue && imageList.find((image) => image.name === selectedValue)) {
+    if (selectedValue && imageList.includes(selectedValue)) {
       return;
     }
 
@@ -67,20 +63,9 @@ const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
     }
   };
 
-  const getNameVersionString = (software: ImageSoftwareType): string => {
-    const versionString = software?.version ? ` ${software?.version}` : '';
-    return `${software.name}${versionString}`;
-  };
-
-  const getDescriptionForImage = (image: ImageType): string => {
-    const softwareDescriptions = image.content.software.map((software) =>
-      getNameVersionString(software),
-    );
-    return softwareDescriptions.join(', ');
-  };
-
+  // TODO: Update Image response to include the description and requirments
   const getImagePopover = (image) => {
-    if (!image.content?.dependencies?.length) {
+    if (!image.requirements) {
       return null;
     }
     return (
@@ -92,14 +77,20 @@ const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
             <span className="jsp-spawner__image-options__packages-popover__title">
               Packages included:
             </span>
-            {image.content.dependencies.map((dependency) => (
+            {image.requirements.map((requirement) => (
               <span
-                key={dependency.name}
+                key={requirement}
                 className="jsp-spawner__image-options__packages-popover__package"
               >
-                {getNameVersionString(dependency)}
+                {requirement}
               </span>
             ))}
+            <Button variant={ButtonVariant.link}>
+              <span className="jsp-spawner__image-options__packages-popover__link-text">
+                Learn more about preinstalled packages
+              </span>
+              <ExternalLinkAltIcon className="jsp-spawner__image-options__packages-popover__link-icon" />
+            </Button>
           </>
         }
       >
@@ -111,19 +102,19 @@ const ImageForm: React.FC<ImageFormProps> = ({ uiConfig }) => {
   const selectOptions =
     imageList?.map((image) => (
       <Radio
-        key={image.name}
-        id={image.name}
-        name={image.display_name}
+        key={image}
+        id={image}
+        name={image}
         className="jsp-spawner__image-options__option"
         label={
           <span className="jsp-spawner__image-options__title">
-            {image.display_name}
+            {image}
             {getImagePopover(image)}
           </span>
         }
-        description={getDescriptionForImage(image)}
-        isChecked={image.name === selectedValue}
-        onChange={(checked: boolean) => handleSelection(image.name, checked)}
+        description={image.description}
+        isChecked={image === selectedValue}
+        onChange={(checked: boolean) => handleSelection(image, checked)}
       />
     )) ?? [];
 

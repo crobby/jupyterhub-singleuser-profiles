@@ -16,19 +16,6 @@
     }
     &__vars {
       margin-left: var(--pf-global--spacer--md);
-      &__value {
-        display: flex;
-        align-items: center;
-        .pf-c-check {
-          margin-left: var(--pf-global--spacer--sm);
-          position: relative;
-          right: 0;
-
-          &.m-is-secret {
-            right: 33px;
-          }
-        }
-      }
     }
     &__remove {
       &.pf-c-button.pf-m-link {
@@ -36,7 +23,7 @@
       }
     }
   }
-  &__toggle-password-vis.pf-c-button {
+  &__toggle-password-vis {
     border-left: 1px solid var(--pf-global--BorderColor--300);
     border-radius: 0;
     color: var(--pf-global--Color--200) !important;
@@ -45,9 +32,7 @@
     right: 34px;
   }
 
-  .pf-c-form__group-control {
-    input {
-      max-width: calc(400px - var(--pf-global--spacer--md));
-    }
+  .pf-c-form__group-control > input {
+    max-width: calc(400px - var(--pf-global--spacer--md));
   }
 }
