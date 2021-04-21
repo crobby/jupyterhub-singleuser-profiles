@@ -24,6 +24,7 @@ const EnvVariablesVariable: React.FC<EnvVariablesVariableProps> = ({
   variableRow,
 }) => {
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
+  const [variableType, setVariableType] = React.useState<string>(variable.type);
 
   const validated = variableRow.errors[variable.name] !== undefined ? 'error' : 'default';
   return (
