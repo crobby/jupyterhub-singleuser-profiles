@@ -49,7 +49,7 @@ class SingleuserProfiles(object):
       self._gpu_mode = self.GPU_MODE_SELINUX
     else:
       self._gpu_mode = None
-  
+
   def load_profiles(self, secret_name="jupyter-singleuser-profiles", filename=None, key_name="jupyterhub-singleuser-profiles.yaml", username=None):
     self.gpu_types = []
     self.profiles = []
@@ -151,7 +151,7 @@ class SingleuserProfiles(object):
   def get_size(self, size):
     s = Sizes(self.sizes)
     return s.get_size(size)
-    
+
   def get_sizes(self):
     return self.sizes
 
@@ -177,7 +177,7 @@ class SingleuserProfiles(object):
   @classmethod
   def env_dict_to_list(self, env_data):
     result = []
-    
+
     for k, v in env_data.items():
       result.append({"name": k, "value": v})
 
@@ -258,6 +258,7 @@ class SingleuserProfiles(object):
 
     return None
 
+
   @classmethod
   def generate_volume_path(self, mountPath, default_mount_path, volume_name):
     if (mountPath):
@@ -278,7 +279,7 @@ class SingleuserProfiles(object):
       memory_limit = int(memory_limit[:-2]) * 1024
 
     return str(memory_limit)
-    
+
 
   @classmethod
   def apply_pod_profile(self, username, pod, profile, gpu_types, default_mount_path, gpu_mode=None, selected_gpu_type="ALL"):
@@ -312,14 +313,14 @@ class SingleuserProfiles(object):
               break
           if not update:
             pod.spec.containers[0].env.append(V1EnvVar(k, v))
-            
+
       elif isinstance(profile_environment, list):
         for i in profile_environment:
           r = type("Response", (), {})
           r.data = json.dumps(i)
           env_var = api_client.deserialize(r, V1EnvVar)
           pod.spec.containers[0].env.append(env_var)
-    
+
     resource_var = None
     resource_json = type("Response", (), {})
     resource_json.data = json.dumps(profile.get('resources'))
