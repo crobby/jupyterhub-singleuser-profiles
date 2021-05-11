@@ -14,7 +14,7 @@ DISPLAY_NAME_ANNOTATION = 'opendatahub.io/notebook-image-name'
 URL_ANNOTATION = 'opendatahub.io/notebook-image-url'
 SOFTWARE_ANNOTATION = 'opendatahub.io/notebook-software'
 DEPENDENCIES_ANNOTATION = 'opendatahub.io/notebook-python-dependencies'
-IMAGE_ORDER_ANNOTATION = 'opendatahub.io/notebook-image-order'
+IMAGE_ORDER_ANNOTATION = 'opendatahub.io/image-order'
 
 
 class NameVersionPair(BaseModel):
@@ -78,31 +78,30 @@ class Images(object):
             annotations = {}
             if i.metadata.annotations:
                 annotations = i.metadata.annotations
-            imagestream_tags = []
-            if i.spec.tags:
-                imagestream_tags = i.spec.tags
+                for tag in i.spec.tags:
+                    if tag.name == tag_name:
+                        tag_annotations = tag.annotations
+                if not tag_annotations:
+                    _LOGGER.error("Image tag not found!")
+                    return "Image tag not found", 404
 
-            for tag in imagestream_tags:
-                if not self.tag_exists(tag.name, i):
-                    continue
-
-                tag_annotations = {}
-                if tag.annotations:
-                    tag_annotations = tag.annotations
-
-                # Default name if there is no display name annotation
-                imagestream_name = "%s:%s" % (i.metadata.name, tag.name)
-
-                result.append(ImageInfo(description=annotations.get(DESCRIPTION_ANNOTATION),
-                                    url=annotations.get(URL_ANNOTATION),
-                                    display_name=annotations.get(DISPLAY_NAME_ANNOTATION) or imagestream_name,
-                                    name=imagestream_name,
+                return ImageInfo(description=annotations.get(desc),
+                                    url=annotations.get(url),
+                                    display_name=annotations.get(display_name),
+                                    name=image_name,
                                     content=ImageTagInfo(
-                                        software=json.loads(tag_annotations.get(SOFTWARE_ANNOTATION, "[]")),\
-                                        dependencies=json.loads(tag_annotations.get(DEPENDENCIES_ANNOTATION, "[]"))
+                                        software=json.loads(tag.annotations.get(SOFTWARE_ANNOTATION, "[]")),\
+                                        dependencies=json.loads(tag.annotations.get(DEPENDENCIES_ANNOTATION, "[]"))
                                     ),
                                     default=bool(strtobool(annotations.get(DEFAULT_IMAGE_ANNOTATION, "False"))),
                                     order=int(annotations.get(IMAGE_ORDER_ANNOTATION, 100))
                                     ))
 
-        return result, code
+        result.sort(key=self.check_place)
+
+        return result
+
+    def get(self):
+        result = self.load()
+
+        return [x.dict() for x in result]
