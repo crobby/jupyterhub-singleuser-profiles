@@ -39,6 +39,14 @@ class Images(object):
         self.openshift = openshift
         self.namespace = namespace
 
+
+    def get_images_legacy(self, result):
+        """Kept for backwards compatibility"""
+
+        for i in self.openshift.get_imagestreams().items:
+            if '-notebook' in i.metadata.name:
+                self.append_option(i, result)
+
     def get_default(self):
         image_list = self.load()
 
@@ -97,11 +105,4 @@ class Images(object):
                                     order=int(annotations.get(IMAGE_ORDER_ANNOTATION, 100))
                                     ))
 
-        result.sort(key=self.check_place)
-
-        return result
-
-    def get(self):
-        result = self.load()
- 
-        return [x.dict() for x in result]
+        return result, code
