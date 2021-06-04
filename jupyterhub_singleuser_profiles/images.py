@@ -49,6 +49,7 @@ class Images(object):
         return image_list[0].name if len(image_list) else None
 
     def tag_exists(self, tag_name, imagestream):
+        _LOGGER.info("inside tag_exists: %s" % tag_name)
         for tag in imagestream.status.tags:
             if tag_name == tag.tag:
                 return True
