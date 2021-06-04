@@ -72,6 +72,7 @@ class Images(object):
                 imagestream_tags = i.spec.tags
 
             for tag in imagestream_tags:
+                _LOGGER.debug("About to call tag_exists")
                 if not self.tag_exists(tag.name, i):
                     continue
 
