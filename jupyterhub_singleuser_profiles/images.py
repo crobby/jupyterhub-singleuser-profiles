@@ -49,8 +49,8 @@ class Images(object):
         return image_list[0].name if len(image_list) else None
 
     def tag_exists(self, tag_name, imagestream):
-        _LOGGER.info("inside tag_exists: %s" % tag_name)
-        for tag in imagestream.status.tags:
+        tags = imagestream.status.get("tags", [])
+        for tag in tags:
             if tag_name == tag.tag:
                 return True
 
@@ -72,7 +72,6 @@ class Images(object):
                 imagestream_tags = i.spec.tags
 
             for tag in imagestream_tags:
-                _LOGGER.debug("About to call tag_exists")
                 if not self.tag_exists(tag.name, i):
                     continue
 
