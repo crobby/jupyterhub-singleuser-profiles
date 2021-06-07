@@ -14,6 +14,7 @@ DISPLAY_NAME_ANNOTATION = 'opendatahub.io/notebook-image-name'
 URL_ANNOTATION = 'opendatahub.io/notebook-image-url'
 SOFTWARE_ANNOTATION = 'opendatahub.io/notebook-software'
 DEPENDENCIES_ANNOTATION = 'opendatahub.io/notebook-python-dependencies'
+IMAGE_ORDER_ANNOTATION = 'opendatahub.io/notebook-image-order'
 
 
 class NameVersionPair(BaseModel):
@@ -31,6 +32,7 @@ class ImageInfo(BaseModel):
     name: str
     content: ImageTagInfo
     default: bool = False
+    order: int = 100
 
 class Images(object):
     def __init__(self, openshift, namespace):
@@ -56,6 +58,9 @@ class Images(object):
                 return True
 
         return False
+
+    def check_place(self, imagestream):
+        return imagestream.order
 
     def load(self):
         result = []
@@ -88,7 +93,8 @@ class Images(object):
                                         software=json.loads(tag_annotations.get(SOFTWARE_ANNOTATION, "[]")),\
                                         dependencies=json.loads(tag_annotations.get(DEPENDENCIES_ANNOTATION, "[]"))
                                     ),
-                                    default=bool(strtobool(annotations.get(DEFAULT_IMAGE_ANNOTATION, "False")))
+                                    default=bool(strtobool(annotations.get(DEFAULT_IMAGE_ANNOTATION, "False"))),
+                                    order=int(annotations.get(IMAGE_ORDER_ANNOTATION, 100))
                                     ))
 
         result.sort(key=self.check_place)
@@ -97,5 +103,5 @@ class Images(object):
 
     def get(self):
         result = self.load()
-
+ 
         return [x.dict() for x in result]

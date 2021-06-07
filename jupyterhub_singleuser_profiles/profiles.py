@@ -258,7 +258,6 @@ class SingleuserProfiles(object):
 
     return None
 
-
   @classmethod
   def generate_volume_path(self, mountPath, default_mount_path, volume_name):
     if (mountPath):
